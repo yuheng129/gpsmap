@@ -50,6 +50,25 @@
   margin: 0;
 }
 
+#pinToggleBtn {
+  position: absolute;
+  top: 20px;
+  left: 270px; /* right of sidebar */
+  z-index: 1000;
+  padding: 10px 16px;
+  background: #ffdd57;
+  color: black;
+  font-weight: bold;
+  border: 2px solid #333;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+#pinToggleBtn.active {
+  background-color: #ff6347;
+  color: white;
+} 
+
 /* Adjust map to not go under sidebar */
 #map {
   position: absolute;
@@ -103,6 +122,7 @@
 
 <!-- Center Robot Button -->
 <button id="centerBtn">Center Robot</button>
+<button id="pinToggleBtn">Pin Mode</button>
 
 <script>
   // Mapbox access token
@@ -170,7 +190,7 @@ function renderPinList() {
 
     // Create list item
     const li = document.createElement('li');
-    li.textContent = `Pin ${key} (${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`;
+    li.textContent = `${marker._element.dataset.name || 'Unnamed'} (${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`;
     li.style.cursor = 'pointer';
     li.style.padding = '4px 8px';
     li.style.borderBottom = '1px solid #ccc';
@@ -206,7 +226,8 @@ db.ref("pins").on("child_added", (snapshot) => {
 
   if (!pinsMarkers[key]) {
     const el = document.createElement('div');
-    el.className = 'survivor-marker';
+  el.className = 'survivor-marker';
+  el.dataset.name = pin.name || `Survivor`; // ✅ Store the name in the marker
 
     const deleteBtn = document.createElement('div');
     deleteBtn.innerText = '×';
@@ -285,6 +306,41 @@ db.ref("pins").on("child_removed", (snapshot) => {
     });
     centerBtn.style.display = 'none';
   });
+
+  let pinMode = false;
+
+const pinToggleBtn = document.getElementById('pinToggleBtn');
+pinToggleBtn.addEventListener('click', () => {
+  pinMode = !pinMode;
+  pinToggleBtn.classList.toggle('active', pinMode);
+  pinToggleBtn.textContent = pinMode ? "Exit Pin Mode" : "Pin Mode";
+});
+
+map.on('click', (e) => {
+  if (!pinMode) return;
+
+  const lng = e.lngLat.lng;
+  const lat = e.lngLat.lat;
+
+  const confirmPin = confirm("Add a survivor pin here?");
+  if (!confirmPin) return;
+
+   // Save to Firebase with custom Survivor # name
+  db.ref("pins").once("value", (snapshot) => {
+    const count = snapshot.numChildren();
+    const newPinRef = db.ref("pins").push();
+    newPinRef.set({
+      lat: lat,
+      lng: lng,
+      name: `Survivor #${count + 1}`
+    });
+  });
+
+  // Exit pinning mode automatically after placing
+  pinMode = false;
+  pinToggleBtn.classList.remove('active');
+  pinToggleBtn.textContent = "Pin Mode";
+});
 </script>
 
 </body>
