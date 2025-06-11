@@ -433,23 +433,34 @@ map.on('click', (e) => {
 
 // ✅ Reusable function to add pin with metadata
 function addSurvivorPin(lat, lng) {
-  // Get the count from Firebase first to generate unique ID
+  const survivorCount = prompt("Enter number of survivors at this location:", "1");
+
+  if (survivorCount === null || survivorCount.trim() === "") {
+    alert("Cancelled: No survivors count entered.");
+    return;
+  }
+
+  // ✅ Get the current map bearing in degrees (automatically)
+  const bearing = map.getBearing(); // This returns a float, like 32.5
+
+  // Get the count from Firebase to assign a new ID
   db.ref("pins").once("value").then((snapshot) => {
     const count = snapshot.numChildren();
-    const survivorId = `Survivor #${count + 1}`; // Always unique based on current data
-
+    const survivorId = `Survivor #${count + 1}`;
     const timeCreated = Date.now();
 
-    // Push only to Firebase — let child_added handle marker creation
+    // Save to Firebase including bearing
     const newPinRef = db.ref("pins").push();
     newPinRef.set({
       lat,
       lng,
       name: survivorId,
-      timeCreated: timeCreated
+      timeCreated: timeCreated,
+      survivorCount: parseInt(survivorCount),
+      bearing: parseFloat(bearing.toFixed(2))  // optional: round to 2 decimals
     });
 
-    // ✅ DO NOT create marker or call renderPinList here!
+    // Let child_added handle UI
   });
 }
 
