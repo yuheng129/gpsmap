@@ -94,6 +94,7 @@
       border: 2px solid white;
     }
 
+
     #centerBtn {
       position: absolute;
       bottom: 20px;     /* position from bottom */
@@ -123,6 +124,24 @@
 <!-- Center Robot Button -->
 <button id="centerBtn">Center Robot</button>
 <button id="pinToggleBtn">Pin Mode</button>
+<button id="findRouteBtn" style="
+  position: absolute;
+  top: 70px; /* Just below the pin toggle button (which is at 20px + ~40px height) */
+  left: 270px; /* Same as pinToggleBtn */
+  z-index: 1000;
+  padding: 10px 16px;
+  background: #007bff; /* Your preferred blue */
+  color: white;
+  font-weight: bold;
+  border: 2px solid #333;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+">
+  Find Route
+</button>
+
+
 
 <script>
   // Mapbox access token
@@ -158,7 +177,7 @@
   const carEl = document.createElement('div');
   carEl.className = 'car-marker';
 
-  const boatMarker = new mapboxgl.Marker(carEl)
+  window.boatMarker = new mapboxgl.Marker(carEl)
     .setLngLat(initial)
     .addTo(map);
 
@@ -184,36 +203,54 @@
 function renderPinList() {
   pinListEl.innerHTML = ''; // clear existing list
 
-  for (const key in pinsMarkers) {
-    const marker = pinsMarkers[key];
-    const lngLat = marker.getLngLat();
-
-    // Create list item
-    const li = document.createElement('li');
-    li.textContent = `${marker._element.dataset.name || 'Unnamed'} (${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`;
-    li.style.cursor = 'pointer';
-    li.style.padding = '4px 8px';
-    li.style.borderBottom = '1px solid #ccc';
-
-    // Click centers map on this pin
-    li.addEventListener('click', () => {
-      map.easeTo({
-        center: [lngLat.lng, lngLat.lat],
-        zoom: 18,
-        duration: 1000,
-        pitch: 60
-      });
-    });
-
-    pinListEl.appendChild(li);
-  }
-
   // If no pins
   if (Object.keys(pinsMarkers).length === 0) {
     const emptyLi = document.createElement('li');
     emptyLi.textContent = 'No survivor pins';
     emptyLi.style.color = '#888';
     pinListEl.appendChild(emptyLi);
+    return;
+  }
+
+  for (const key in pinsMarkers) {
+    const marker = pinsMarkers[key];
+    const lngLat = marker.getLngLat();
+
+    // Create list item container
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.alignItems = 'center';
+    li.style.gap = '8px';
+    li.style.padding = '4px 8px';
+    li.style.borderBottom = '1px solid #ccc';
+    li.style.cursor = 'pointer';
+
+    // Create checkbox
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'pin-checkbox';
+    checkbox.dataset.key = key;
+
+    // Create label
+    const label = document.createElement('span');
+    label.textContent = `${marker._element.dataset.name || 'Unnamed'} (${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`;
+
+    // Click on label or list item flies to pin (but not when clicking checkbox)
+    li.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'INPUT') {
+        map.easeTo({
+          center: [lngLat.lng, lngLat.lat],
+          zoom: 18,
+          duration: 1000,
+          pitch: 60
+        });
+      }
+    });
+
+    // Build the list item
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    pinListEl.appendChild(li);
   }
 }
 
@@ -341,6 +378,131 @@ map.on('click', (e) => {
   pinToggleBtn.classList.remove('active');
   pinToggleBtn.textContent = "Pin Mode";
 });
+
+
+
+// Add this script to your existing HTML to compute and display a TSP route
+
+// Button to trigger route finding
+document.getElementById("findRouteBtn").addEventListener("click", () => {
+  computeAndDrawRoute();
+});
+
+// Function to compute and draw the best route using Nearest Neighbor TSP
+function computeAndDrawRoute() {
+  if (!window.boatMarker) {
+    alert("Boat location missing!");
+    return;
+  }
+
+  const boatPos = boatMarker.getLngLat();
+  const start = { lat: boatPos.lat, lng: boatPos.lng };
+
+  // Get only selected (checked) survivor pins
+  const selectedPins = Array.from(document.querySelectorAll('.pin-checkbox:checked'))
+    .map(checkbox => {
+      const key = checkbox.dataset.key;
+      if (!pinsMarkers[key]) return null; // safety check
+      const pos = pinsMarkers[key].getLngLat();
+      return { key, lat: pos.lat, lng: pos.lng };
+    })
+    .filter(pin => pin !== null); // remove any nulls
+
+  if (selectedPins.length === 0) {
+    alert("No survivor pins selected!");
+    return;
+  }
+
+  // Nearest Neighbor TSP logic
+  const visited = new Set();
+  const route = [start];
+  let current = start;
+
+  while (visited.size < selectedPins.length) {
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const pin of selectedPins) {
+      if (!visited.has(pin.key)) {
+        const dist = haversine(current, pin);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = pin;
+        }
+      }
+    }
+
+    if (nearest) {
+      visited.add(nearest.key);
+      route.push({ lat: nearest.lat, lng: nearest.lng });
+      current = nearest;
+    }
+  }
+
+  route.push(start); // Return to base
+  drawRouteLine(route);
+}
+
+// Helper: Haversine distance (in meters)
+function haversine(a, b) {
+  const toRad = (d) => d * Math.PI / 180; // degrees → radians
+  const R = 6371000; // Earth's radius in meters
+
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+
+  const a1 = Math.sin(dLat / 2) ** 2 +
+             Math.cos(lat1) * Math.cos(lat2) *
+             Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a1), Math.sqrt(1 - a1));
+
+  return R * c; // distance in meters
+}
+
+// Draw route on the map
+let routeLine;
+function drawRouteLine(coords) {
+  if (!coords || coords.length < 2) {
+    console.warn("Not enough points to draw a route.");
+    return;
+  }
+
+  console.log("Drawing route:", coords);  // ← Add this
+
+  if (map.getLayer("routeLine")) map.removeLayer("routeLine");
+  if (map.getSource("route")) map.removeSource("route");
+
+  const routeGeoJSON = {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: coords.map(c => [c.lng, c.lat])
+    }
+  };
+
+  map.addSource("route", { type: "geojson", data: routeGeoJSON });
+
+  map.addLayer({
+    id: "routeLine",
+    type: "line",
+    source: "route",
+    layout: {},
+    paint: {
+      "line-color": "#ff7e5f",
+      "line-width": 4
+    }
+  });
+
+  map.flyTo({ center: coords[0] || [0,0], zoom: 16 });
+}
+
+
+
+
+
+  
 </script>
 
 </body>
