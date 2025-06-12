@@ -520,11 +520,21 @@
       // Add this script to your existing HTML to compute and display a TSP route
 
       // Button to trigger route finding
+      // Button to trigger route finding
       document.getElementById("findRouteBtn").addEventListener("click", () => {
-        computeAndDrawRoute();
-      });
+  updateSelectedPins();           // 🔴 This must be called first
+  computeAIOptimizedRoute();      // 🔵 Then route is computed
+});
 
       let startMarker = null; // Global to keep track
+      // Global variable to track selected pin keys
+let selectedPinKeys = [];
+
+function updateSelectedPins() {
+  selectedPinKeys = Array.from(
+    document.querySelectorAll(".pin-checkbox:checked")
+  ).map((checkbox) => checkbox.dataset.key);
+}
 
       function computeAndDrawRoute() {
         if (!window.boatMarker) {
@@ -600,6 +610,8 @@
         return R * c; // distance in meters
       }
 
+      
+
       // Draw route on the map
       let routeLine;
       function drawRouteLine(coords) {
@@ -661,6 +673,77 @@
 
   drawRouteLine([start, end]); // draw direct route back
 });
+
+  async function computeAIOptimizedRoute() {
+  const boatPos = boatMarker.getLngLat();
+  const start = { lat: boatPos.lat, lng: boatPos.lng };
+
+  // Fetch pins
+  const snapshot = await db.ref("pins").once("value");
+  const pins = [];
+  snapshot.forEach((child) => {
+    const key = child.key;
+    if (!selectedPinKeys.includes(key)) return;  // 🔥 Only include selected pins
+    
+    const data = child.val();
+    const distance = haversine(start, { lat: data.lat, lng: data.lng });
+    pins.push({
+      key: child.key,
+      lat: data.lat,
+      lng: data.lng,
+      timeCreated: data.timeCreated,
+      survivorCount: data.survivorCount || 1,
+      distance: distance,
+    });
+  });
+
+  // Normalize
+  const times = pins.map(p => p.timeCreated);
+  const minTime = Math.min(...times), maxTime = Math.max(...times);
+  const distances = pins.map(p => p.distance);
+  const minDist = Math.min(...distances), maxDist = Math.max(...distances);
+  const survivors = pins.map(p => p.survivorCount);
+  const minSurv = Math.min(...survivors), maxSurv = Math.max(...survivors);
+
+  pins.forEach(p => {
+    const timeScore = (p.timeCreated - minTime) / (maxTime - minTime + 1);
+    const distanceScore = 1 - (p.distance - minDist) / (maxDist - minDist + 1);
+    const survivorScore = (p.survivorCount - minSurv) / (maxSurv - minSurv + 1);
+
+    p.priorityScore = 0.4 * timeScore + 0.3 * distanceScore + 0.3 * survivorScore;
+  });
+
+  // Sort by priority
+  pins.sort((a, b) => b.priorityScore - a.priorityScore);
+
+  // Build route (Nearest Neighbor)
+  const visited = new Set();
+  const route = [start];
+  let current = start;
+
+  while (visited.size < pins.length) {
+    let next = null;
+    let bestDist = Infinity;
+    for (const pin of pins) {
+      if (!visited.has(pin.key)) {
+        const d = haversine(current, pin);
+        if (d < bestDist) {
+          bestDist = d;
+          next = pin;
+        }
+      }
+    }
+    if (next) {
+      route.push({ lat: next.lat, lng: next.lng });
+      current = next;
+      visited.add(next.key);
+    }
+  }
+
+  drawRouteLine(route);
+}
+
+
     </script>
   </body>
 </html>
