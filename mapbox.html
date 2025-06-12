@@ -54,10 +54,11 @@
         margin: 0;
       }
 
+      /* 1. Pin Toggle Button */
       #pinToggleBtn {
         position: absolute;
         top: 20px;
-        left: 270px; /* right of sidebar */
+        left: 270px;
         z-index: 1000;
         padding: 10px 16px;
         background: #ffdd57;
@@ -67,12 +68,16 @@
         border-radius: 5px;
         cursor: pointer;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #pinToggleBtn:hover {
+        background-color: #ffc107;
+        transform: scale(1.05);
       }
       #pinToggleBtn.active {
         background-color: #ff6347;
         color: white;
       }
-
       /* Adjust map to not go under sidebar */
       #map {
         position: absolute;
@@ -98,10 +103,11 @@
         border: 2px solid white;
       }
 
+      /* 2. Center Button */
       #centerBtn {
         position: absolute;
-        bottom: 20px; /* position from bottom */
-        right: 20px; /* position from right */
+        bottom: 20px;
+        right: 20px;
         z-index: 1000;
         padding: 10px 16px;
         background: white;
@@ -111,7 +117,61 @@
         border-radius: 5px;
         cursor: pointer;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-        display: none; /* Hidden at first */
+        display: none;
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #centerBtn:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.05);
+      }
+      #centerBtn.active {
+        background-color: #ddd;
+      }
+
+      #findRouteBtn {
+        position: absolute;
+        top: 70px;
+        left: 270px;
+        z-index: 1000;
+        padding: 10px 16px;
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+        border: 2px solid #333;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #findRouteBtn:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+      }
+      #findRouteBtn.active {
+        background-color: #003d80;
+      }
+
+      #returnToStartBtn {
+        position: absolute;
+        top: 120px;
+        left: 270px;
+        z-index: 1000;
+        padding: 10px 16px;
+        background: #28a745;
+        color: white;
+        font-weight: bold;
+        border: 2px solid #1c7c33;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #returnToStartBtn:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+      }
+      #returnToStartBtn.active {
+        background-color: #1e7e34;
       }
     </style>
   </head>
@@ -127,45 +187,8 @@
     <!-- Center Robot Button -->
     <button id="centerBtn">Center Robot</button>
     <button id="pinToggleBtn">Pin Mode</button>
-    <button
-      id="findRouteBtn"
-      style="
-        position: absolute;
-        top: 70px; /* Just below the pin toggle button (which is at 20px + ~40px height) */
-        left: 270px; /* Same as pinToggleBtn */
-        z-index: 1000;
-        padding: 10px 16px;
-        background: #007bff; /* Your preferred blue */
-        color: white;
-        font-weight: bold;
-        border: 2px solid #333;
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-      "
-    >
-      Find Route
-    </button>
-
-    <button
-      id="returnToStartBtn"
-      style="
-        position: absolute;
-        top: 120px; /* 20px below the Find Route button at top: 70px + ~30px height */
-        left: 270px; /* aligned with Find Route */
-        z-index: 1000;
-        padding: 10px 16px;
-        background: #28a745; /* green */
-        color: white;
-        font-weight: bold;
-        border: 2px solid #1c7c33;
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-      "
-    >
-      Return to Start
-    </button>
+    <button id="findRouteBtn">Find Route</button>
+    <button id="returnToStartBtn">Return to Start</button>
 
     <script>
       // Mapbox access token
@@ -196,6 +219,18 @@
         zoom: 16,
         pitch: 60,
         bearing: 0,
+      });
+
+      let baseLocation = null;
+
+      db.ref("baseLocation").once("value").then((snapshot) => {
+      const data = snapshot.val();
+      if (data && data.lat && data.lng) {
+        baseLocation = { lat: data.lat, lng: data.lng };
+        console.log("✅ Base location loaded:", baseLocation);
+      } else {
+        console.warn("⚠️ Base location not set in Firebase.");
+      }
       });
 
       // Load and render survivor pins from Firebase
@@ -500,12 +535,7 @@
         const boatPos = boatMarker.getLngLat();
         const start = { lat: boatPos.lat, lng: boatPos.lng };
 
-        // Mark start location (with a green pin, for example)
-        if (startMarker) startMarker.remove();
-        startMarker = new mapboxgl.Marker({ color: "green" })
-          .setLngLat([start.lng, start.lat])
-          .setPopup(new mapboxgl.Popup().setText("Start Position"))
-          .addTo(map);
+        
 
         // Get selected pins
         const selectedPins = Array.from(
@@ -607,20 +637,30 @@
         map.flyTo({ center: coords[0] || [0, 0], zoom: 16 });
       }
 
-      document
-        .getElementById("returnToStartBtn")
-        .addEventListener("click", () => {
-          if (!window.currentRoute || window.currentRoute.length < 2) {
-            alert("No existing route to return from!");
-            return;
-          }
+      document.getElementById("returnToStartBtn").addEventListener("click", () => {
+  if (!baseLocation) {
+    alert("Base location not loaded yet!");
+    return;
+  }
 
-          const returnToStart = [...window.currentRoute];
-          const first = window.currentRoute[0];
-          returnToStart.push({ lat: first.lat, lng: first.lng }); // Return leg
+  if (!window.boatMarker) {
+    alert("Boat location not available.");
+    return;
+  }
 
-          drawRouteLine(returnToStart);
-        });
+  const boatPos = boatMarker.getLngLat();
+  const start = { lat: boatPos.lat, lng: boatPos.lng };
+  const end = baseLocation;
+
+  // Optional: mark the base with a green pin
+  if (window.baseMarker) baseMarker.remove();
+  window.baseMarker = new mapboxgl.Marker({ color: "green" })
+    .setLngLat([end.lng, end.lat])
+    .setPopup(new mapboxgl.Popup().setText("Base Location"))
+    .addTo(map);
+
+  drawRouteLine([start, end]); // draw direct route back
+});
     </script>
   </body>
 </html>
