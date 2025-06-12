@@ -13,6 +13,14 @@ html, body {
   overflow: hidden;
 }
 
+/* NEW: Scrollable right column container */
+.main-scroll-container {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* Sidebar fixed width */
 .amphibot-sidebar {
   width: 350px;
@@ -36,7 +44,6 @@ html, body {
   font-size: 0.95em;
 }
 
-
 /* Amphibot selector scrollable list */
 .amphibot-selector-scrollable {
   flex: 1;
@@ -45,8 +52,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 19px;
-  width: 75%;       /* fill the parent */
-  max-width: 100%;   /* ensure it doesn't constrain itself */
+  width: 75%;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -67,37 +74,38 @@ html, body {
 }
 
 .stat-label {
-  font-size: 32px; /* Bigger text on top */
+  font-size: 32px;
   font-weight: 700;
   margin-bottom: -5px;
 }
 
 .stat-sub {
-  font-size: 16px; /* Smaller label */
+  font-size: 16px;
   color: #ccc;
   letter-spacing: 1px;
 }
 
-
 /* Main content area */
 .map-main-content {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   padding: 20px;
   overflow: hidden;
   box-sizing: border-box;
+  padding-top: 0rem;
+  margin-top: 0;
 }
 
 /* Status header */
 .status-header {
-  margin-bottom: 15px;
-  padding: 10px;
+  margin-bottom: 5px;
+  padding: 8px;
   background-color: #252525;
   border-radius: 8px;
   color: #f7f7f7;
   font-size: 1.5em;
   font-weight: bold;
+  text-align: left;
 }
 
 /* Grid container for content */
@@ -120,20 +128,19 @@ html, body {
 
 /* Left column with stacked cards */
 .left-column {
-  flex: 1;
+  flex: 0.8;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 15px;
 }
 
-/* Right column with location */
 .right-column {
   flex: 1;
-}
-
-/* Bottom section for camera */
-.bottom-section {
-  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 15px;
 }
 
 /* Cards */
@@ -144,35 +151,72 @@ html, body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  min-height: 150px;
+  min-height: 10px;
   height: 100%;
+}
+
+.supplies-card {
+  height: 160px;
+  overflow-y: auto;
+  padding-right: 10px; /* Optional: avoids scrollbar overlapping text */
+}
+
+.supplies-card ul {
+  padding-left: 0;
+  margin: 0;
+  margin-top: 2px;
+  list-style-position: inside;
+  text-align: left; /* Ensures text is aligned to the left */
+}
+
+
+.supplies-card li {
+  text-align: left;
+}
+
+.location-card {
+  min-height: 312px;
+}
+
+.battery-card {
+  height: 90px;
+  justify-content: center;
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 2.3px;
   font-weight: bold;
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 1.1em;
+  font-size: 1.3em;
   color: #e0e0e0;
 }
 
-.map-placeholder img,
+.map-image {
+  width: 95%;
+  height: 90%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin-top: 5px;
+  margin: 5px auto 0 auto;
+}
+
 .camera-placeholder img {
   width: 100%;
-  height: 160px;
+  height: 100px;
   object-fit: cover;
   border-radius: 8px;
 }
 
 .battery-bar-container {
   width: 100%;
-  height: 20px;
+  height: 15px;
   background-color: #444;
   border-radius: 10px;
   overflow: hidden;
@@ -182,7 +226,7 @@ html, body {
 .battery-bar {
   height: 100%;
   background-color: #4caf50;
-  width: 85%; /* Dynamic via JS if needed */
+  width: 85%;
   transition: width 0.5s ease-in-out;
 }
 
@@ -212,4 +256,43 @@ html, body {
 
 .amphibot-icon {
   font-size: 1.2em;
+}
+
+.camera-feed-card {
+  margin-top: 0px;
+  height: 700px;
+  width: 220%;
+}
+
+.camera-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 8px;
+  display: block;
+  margin-top: 5px;
+}
+
+.card-icon {
+  border: 2px solid;
+  border-radius: 6px;
+  padding: 4px;
+}
+
+/* Specific colors matching each card */
+.supplies-card .card-icon {
+  border-color: #4ADE80; /* Green */
+}
+
+.battery-card .card-icon {
+  border-color: #FACC15; /* Yellow */
+}
+
+.location-card .card-icon {
+  border-color: #3B82F6; /* Blue */
+}
+
+.camera-feed-card .card-icon {
+  border-color: #C084FC; /* Purple */
 }
