@@ -1,3 +1,9 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 .map-page {
   display: flex;
   height: 100vh;
@@ -6,17 +12,18 @@
 
 .map-sidebar {
   width: 250px;
-  background: #f8f8f8;
-  border-right: 1px solid #ccc;
-  padding: 10px 15px;
+  background-color: white;
+  padding: 16px;
+  color: black;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 10;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .map-view {
-  flex-grow: 1;
-  position: relative;
+  flex: 1;
 }
+
 
 /* Position buttons */
 #centerBtn,
@@ -57,4 +64,37 @@
   left: 270px;
   background: #28a745;
   color: white;
+}
+
+.survivor-marker {
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.robot-marker {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid blue;
+  transform: rotate(45deg);
+}
+
+.mapboxgl-popup-content {
+  color: black;
+  font-weight: bold;
+}
+
+.arrow-marker {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.mapboxgl-popup {
+  z-index: 9999;
+  font-size: 14px;
 }
