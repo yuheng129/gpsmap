@@ -1,149 +1,71 @@
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-.map-page {
-  display: flex;
+i want it cnt be scroll and the map view and text field move to centre
+/* Full-screen background and overlay */
+.login-page {
+  position: relative;
   height: 100vh;
   width: 100vw;
-  font-family: Arial, sans-serif;
+  overflow: hidden;
+  font-family: sans-serif;
 }
 
-.map-sidebar {
-  width: 300px;
-  background-color: #ffffff;
-  padding: 16px;
-  color: #000;
-  overflow-y: auto;
-  z-index: 10;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.map-view {
-  flex: 1;
-  position: relative;
-}
-
-/* Sidebar pin list */
-.pin-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.pin-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.pin-header a {
-  font-weight: 600;
-  text-decoration: none;
-  color: #1d4ed8;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.pin-header a:hover {
-  text-decoration: underline;
-}
-
-.pin-actions {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-
-.pin-actions svg {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.pin-actions svg:hover {
-  transform: scale(1.1);
-}
-
-.pin-timestamp {
-  font-size: 12px;
-  color: #666;
-}
-
-/* Position buttons */
-#centerBtn,
-#pinToggleBtn,
-#findRouteBtn,
-#returnToStartBtn {
+.map-background {
+  background-image: url('../assets/map-image.png'); /* you can use an actual background or live map later */
+  background-position: top center;  /* align top part */
+  background-size: contain;         /* show whole image */
+  filter: brightness(0.5);
+  height: 900px;
+  width: 100%;
   position: absolute;
-  z-index: 1100;
-  padding: 10px 16px;
+  z-index: 0;
+}
+
+.login-overlay {
+  position: absolute;
+  z-index: 1;
+  top: 30%;
+  left: 51%;
+  transform: translate(-50%, -30%);
+  text-align: center;
+  color: white;
+}
+
+.map-title {
+  font-size: 48px;
   font-weight: bold;
-  border: 2px solid #333;
-  border-radius: 5px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+
+.code-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.code-input {
+  padding: 10px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  width: 220px;
+  text-align: center;
+}
+
+.submit-btn {
+  background-color: #2c83ff;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  background: white;
-  color: black;
 }
 
-#centerBtn {
-  bottom: 20px;
-  right: 20px;
+.submit-btn:hover {
+  background-color: #0054c3;
 }
 
-#pinToggleBtn {
-  top: 20px;
-  left: 310px;
-}
-
-#findRouteBtn {
-  top: 70px;
-  left: 310px;
-  background: #007bff;
-  color: white;
-}
-
-#returnToStartBtn {
-  top: 120px;
-  left: 310px;
-  background: #28a745;
-  color: white;
-}
-
-/* Markers */
-.survivor-marker {
-  width: 12px;
-  height: 12px;
-  background-color: red;
-  border-radius: 50%;
-  border: 2px solid white;
-}
-
-.robot-marker {
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 20px solid blue;
-  transform: rotate(45deg);
-}
-
-.arrow-marker {
-  width: 30px;
-  height: 30px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* Mapbox popups */
-.mapboxgl-popup-content {
-  color: black;
-  font-weight: bold;
-}
-
-.mapboxgl-popup {
-  z-index: 9999;
-  font-size: 14px;
+.status-msg {
+  margin-top: 15px;
+  font-size: 16px;
 }
