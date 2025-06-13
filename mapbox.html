@@ -183,6 +183,7 @@
     </div>
     <!-- Map -->
     <div id="map"></div>
+    <div id="eta-display" style="margin-top: 10px; font-weight: bold;"></div>
 
     <!-- Center Robot Button -->
     <button id="centerBtn">Center Robot</button>
@@ -223,15 +224,17 @@
 
       let baseLocation = null;
 
-      db.ref("baseLocation").once("value").then((snapshot) => {
-      const data = snapshot.val();
-      if (data && data.lat && data.lng) {
-        baseLocation = { lat: data.lat, lng: data.lng };
-        console.log("✅ Base location loaded:", baseLocation);
-      } else {
-        console.warn("⚠️ Base location not set in Firebase.");
-      }
-      });
+      db.ref("baseLocation")
+        .once("value")
+        .then((snapshot) => {
+          const data = snapshot.val();
+          if (data && data.lat && data.lng) {
+            baseLocation = { lat: data.lat, lng: data.lng };
+            console.log("✅ Base location loaded:", baseLocation);
+          } else {
+            console.warn("⚠️ Base location not set in Firebase.");
+          }
+        });
 
       // Load and render survivor pins from Firebase
       db.ref("pins").on("value", (snapshot) => {
@@ -522,19 +525,19 @@
       // Button to trigger route finding
       // Button to trigger route finding
       document.getElementById("findRouteBtn").addEventListener("click", () => {
-  updateSelectedPins();           // 🔴 This must be called first
-  computeAIOptimizedRoute();      // 🔵 Then route is computed
-});
+        updateSelectedPins(); // 🔴 This must be called first
+        computeAIOptimizedRoute(); // 🔵 Then route is computed
+      });
 
       let startMarker = null; // Global to keep track
       // Global variable to track selected pin keys
-let selectedPinKeys = [];
+      let selectedPinKeys = [];
 
-function updateSelectedPins() {
-  selectedPinKeys = Array.from(
-    document.querySelectorAll(".pin-checkbox:checked")
-  ).map((checkbox) => checkbox.dataset.key);
-}
+      function updateSelectedPins() {
+        selectedPinKeys = Array.from(
+          document.querySelectorAll(".pin-checkbox:checked")
+        ).map((checkbox) => checkbox.dataset.key);
+      }
 
       function computeAndDrawRoute() {
         if (!window.boatMarker) {
@@ -544,8 +547,6 @@ function updateSelectedPins() {
 
         const boatPos = boatMarker.getLngLat();
         const start = { lat: boatPos.lat, lng: boatPos.lng };
-
-        
 
         // Get selected pins
         const selectedPins = Array.from(
@@ -610,8 +611,6 @@ function updateSelectedPins() {
         return R * c; // distance in meters
       }
 
-      
-
       // Draw route on the map
       let routeLine;
       function drawRouteLine(coords) {
@@ -649,101 +648,132 @@ function updateSelectedPins() {
         map.flyTo({ center: coords[0] || [0, 0], zoom: 16 });
       }
 
-      document.getElementById("returnToStartBtn").addEventListener("click", () => {
-  if (!baseLocation) {
-    alert("Base location not loaded yet!");
-    return;
-  }
+      document
+        .getElementById("returnToStartBtn")
+        .addEventListener("click", () => {
+          if (!baseLocation) {
+            alert("Base location not loaded yet!");
+            return;
+          }
 
-  if (!window.boatMarker) {
-    alert("Boat location not available.");
-    return;
-  }
+          if (!window.boatMarker) {
+            alert("Boat location not available.");
+            return;
+          }
 
-  const boatPos = boatMarker.getLngLat();
-  const start = { lat: boatPos.lat, lng: boatPos.lng };
-  const end = baseLocation;
+          const boatPos = boatMarker.getLngLat();
+          const start = { lat: boatPos.lat, lng: boatPos.lng };
+          const end = baseLocation;
 
-  // Optional: mark the base with a green pin
-  if (window.baseMarker) baseMarker.remove();
-  window.baseMarker = new mapboxgl.Marker({ color: "green" })
-    .setLngLat([end.lng, end.lat])
-    .setPopup(new mapboxgl.Popup().setText("Base Location"))
-    .addTo(map);
+          // Optional: mark the base with a green pin
+          if (window.baseMarker) baseMarker.remove();
+          window.baseMarker = new mapboxgl.Marker({ color: "green" })
+            .setLngLat([end.lng, end.lat])
+            .setPopup(new mapboxgl.Popup().setText("Base Location"))
+            .addTo(map);
 
-  drawRouteLine([start, end]); // draw direct route back
-});
+          drawRouteLine([start, end]); // draw direct route back
+        });
 
-  async function computeAIOptimizedRoute() {
-  const boatPos = boatMarker.getLngLat();
-  const start = { lat: boatPos.lat, lng: boatPos.lng };
+      async function computeAIOptimizedRoute() {
+        const boatPos = boatMarker.getLngLat();
+        const start = { lat: boatPos.lat, lng: boatPos.lng };
 
-  // Fetch pins
-  const snapshot = await db.ref("pins").once("value");
-  const pins = [];
-  snapshot.forEach((child) => {
-    const key = child.key;
-    if (!selectedPinKeys.includes(key)) return;  // 🔥 Only include selected pins
-    
-    const data = child.val();
-    const distance = haversine(start, { lat: data.lat, lng: data.lng });
-    pins.push({
-      key: child.key,
-      lat: data.lat,
-      lng: data.lng,
-      timeCreated: data.timeCreated,
-      survivorCount: data.survivorCount || 1,
-      distance: distance,
-    });
-  });
+        // Fetch pins
+        const snapshot = await db.ref("pins").once("value");
+        const pins = [];
+        snapshot.forEach((child) => {
+          const key = child.key;
+          if (!selectedPinKeys.includes(key)) return; // 🔥 Only include selected pins
 
-  // Normalize
-  const times = pins.map(p => p.timeCreated);
-  const minTime = Math.min(...times), maxTime = Math.max(...times);
-  const distances = pins.map(p => p.distance);
-  const minDist = Math.min(...distances), maxDist = Math.max(...distances);
-  const survivors = pins.map(p => p.survivorCount);
-  const minSurv = Math.min(...survivors), maxSurv = Math.max(...survivors);
+          const data = child.val();
+          const distance = haversine(start, { lat: data.lat, lng: data.lng });
+          pins.push({
+            key: child.key,
+            lat: data.lat,
+            lng: data.lng,
+            timeCreated: data.timeCreated,
+            survivorCount: data.survivorCount || 1,
+            distance: distance,
+          });
+        });
 
-  pins.forEach(p => {
-    const timeScore = (p.timeCreated - minTime) / (maxTime - minTime + 1);
-    const distanceScore = 1 - (p.distance - minDist) / (maxDist - minDist + 1);
-    const survivorScore = (p.survivorCount - minSurv) / (maxSurv - minSurv + 1);
+        // Normalize
+        const times = pins.map((p) => p.timeCreated);
+        const minTime = Math.min(...times),
+          maxTime = Math.max(...times);
+        const distances = pins.map((p) => p.distance);
+        const minDist = Math.min(...distances),
+          maxDist = Math.max(...distances);
+        const survivors = pins.map((p) => p.survivorCount);
+        const minSurv = Math.min(...survivors),
+          maxSurv = Math.max(...survivors);
 
-    p.priorityScore = 0.4 * timeScore + 0.3 * distanceScore + 0.3 * survivorScore;
-  });
+        pins.forEach((p) => {
+          const timeScore = (p.timeCreated - minTime) / (maxTime - minTime + 1);
+          const distanceScore =
+            1 - (p.distance - minDist) / (maxDist - minDist + 1);
+          const survivorScore =
+            (p.survivorCount - minSurv) / (maxSurv - minSurv + 1);
 
-  // Sort by priority
-  pins.sort((a, b) => b.priorityScore - a.priorityScore);
+          p.priorityScore =
+            0.4 * timeScore + 0.3 * distanceScore + 0.3 * survivorScore;
+        });
 
-  // Build route (Nearest Neighbor)
-  const visited = new Set();
-  const route = [start];
-  let current = start;
+        // Sort by priority
+        pins.sort((a, b) => b.priorityScore - a.priorityScore);
 
-  while (visited.size < pins.length) {
-    let next = null;
-    let bestDist = Infinity;
-    for (const pin of pins) {
-      if (!visited.has(pin.key)) {
-        const d = haversine(current, pin);
-        if (d < bestDist) {
-          bestDist = d;
-          next = pin;
+        // Build route (Nearest Neighbor)
+        const visited = new Set();
+        const route = [start];
+        let current = start;
+
+        while (visited.size < pins.length) {
+          let next = null;
+          let bestDist = Infinity;
+          for (const pin of pins) {
+            if (!visited.has(pin.key)) {
+              const d = haversine(current, pin);
+              if (d < bestDist) {
+                bestDist = d;
+                next = pin;
+              }
+            }
+          }
+          if (next) {
+            route.push({ lat: next.lat, lng: next.lng });
+            current = next;
+            visited.add(next.key);
+          }
         }
+
+        drawRouteLine(route);
+
+        const totalSeconds = estimateRouteTime(route);
+const minutes = Math.round(totalSeconds / 60);
+
+// Choose a position to show the popup — here: the start point
+const etaPopup = new mapboxgl.Popup({ offset: 25 })
+  .setLngLat([route[0].lng, route[0].lat])
+  .setHTML(`<strong>ETA:</strong> ${minutes} min (incl. stops)`)
+  .addTo(map);
       }
-    }
-    if (next) {
-      route.push({ lat: next.lat, lng: next.lng });
-      current = next;
-      visited.add(next.key);
-    }
+
+      function estimateRouteTime(route, speedMps = 0.65, stopDurationPerPinMin = 10) {
+  let totalDistance = 0; // in meters
+  for (let i = 1; i < route.length; i++) {
+    totalDistance += haversine(route[i - 1], route[i]); // meters
   }
 
-  drawRouteLine(route);
+  const travelSeconds = totalDistance / speedMps;
+
+  // One stop per pin (excluding starting point)
+  const numberOfStops = route.length - 2; // exclude boat start and return-to-base
+  const stopSeconds = numberOfStops * stopDurationPerPinMin * 60;
+
+  const totalSeconds = travelSeconds + stopSeconds;
+  return totalSeconds;
 }
-
-
     </script>
   </body>
 </html>
