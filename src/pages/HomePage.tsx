@@ -1,21 +1,18 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 👈 import navigate hook
+import { useNavigate } from 'react-router-dom';
 import floodBg from '../assets/Flood_bg.jpg';
+import amphibotPhoto from '../assets/AmphiBot_photo.png'; // 👈 Import the image
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
-  const navigate = useNavigate(); // 👈 initialize hook
+  const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate('/map'); // 👈 navigate to /map page
+    navigate('/map');
   };
 
   return (
-    <div 
-      className="homepage-container" 
-style={{ backgroundImage: `url(${floodBg})` }}
-
-    >
+    <div className="homepage-container" style={{ backgroundImage: `url(${floodBg})` }}>
       <div className="homepage-overlay">
         <div className="homepage-content">
           <h1 className="homepage-title">
@@ -24,6 +21,9 @@ style={{ backgroundImage: `url(${floodBg})` }}
           <button className="homepage-button" onClick={handleGetStarted}>
             Get Started
           </button>
+          <div className="homepage-image-wrapper">
+            <img src={amphibotPhoto} alt="Amphibot" className="homepage-image" />
+          </div>
         </div>
       </div>
     </div>

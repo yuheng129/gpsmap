@@ -8,13 +8,14 @@ html, body, #root {
   display: flex;
   height: 100vh;
   width: 100vw;
+  font-family: Arial, sans-serif;
 }
 
 .map-sidebar {
-  width: 250px;
-  background-color: white;
+  width: 300px;
+  background-color: #ffffff;
   padding: 16px;
-  color: black;
+  color: #000;
   overflow-y: auto;
   z-index: 10;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
@@ -22,8 +23,52 @@ html, body, #root {
 
 .map-view {
   flex: 1;
+  position: relative;
 }
 
+/* Sidebar pin list */
+.pin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pin-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.pin-header a {
+  font-weight: 600;
+  text-decoration: none;
+  color: #1d4ed8;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.pin-header a:hover {
+  text-decoration: underline;
+}
+
+.pin-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.pin-actions svg {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.pin-actions svg:hover {
+  transform: scale(1.1);
+}
+
+.pin-timestamp {
+  font-size: 12px;
+  color: #666;
+}
 
 /* Position buttons */
 #centerBtn,
@@ -49,23 +94,24 @@ html, body, #root {
 
 #pinToggleBtn {
   top: 20px;
-  left: 270px;
+  left: 310px;
 }
 
 #findRouteBtn {
   top: 70px;
-  left: 270px;
+  left: 310px;
   background: #007bff;
   color: white;
 }
 
 #returnToStartBtn {
   top: 120px;
-  left: 270px;
+  left: 310px;
   background: #28a745;
   color: white;
 }
 
+/* Markers */
 .survivor-marker {
   width: 12px;
   height: 12px;
@@ -83,15 +129,18 @@ html, body, #root {
   transform: rotate(45deg);
 }
 
+.arrow-marker {
+  width: 30px;
+  height: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Mapbox popups */
 .mapboxgl-popup-content {
   color: black;
   font-weight: bold;
-}
-
-.arrow-marker {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
 }
 
 .mapboxgl-popup {

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Package, MapPin, BatteryCharging, Video } from 'lucide-react';
 import './RobotPage.css';
+import mapImage from '../assets/map-image.png';
+import cameraFeed from '../assets/flood.png';
 
 interface AmphibotDetails {
   name: string;
@@ -19,8 +21,7 @@ const amphibotData: Record<string, AmphibotDetails> = {
     battery: 85,
     supplies: ['Emergency Kit', 'Water (5L)', 'Rations (3 days)', 'Bread', 'Paracetamol', 'Plaster', 'Blanket'],
     location: 'Sector Alpha-7',
-    cameraFeed:
-      'https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=800&auto=format&fit=crop',
+    cameraFeed: cameraFeed,
   },
   'Amphibot 002': {
     name: 'Amphibot 002',
@@ -28,8 +29,7 @@ const amphibotData: Record<string, AmphibotDetails> = {
     battery: 60,
     supplies: ['First Aid Kit', 'Tools'],
     location: 'Base Camp',
-    cameraFeed:
-      'https://images.unsplash.com/photo-1517404215738-15263e9f9178?q=80&w=800&auto=format&fit=crop',
+    cameraFeed: cameraFeed,
   },
 };
 
@@ -181,11 +181,7 @@ const RobotPage: React.FC = () => {
                 <MapPin size={20} className="card-icon" style={{ color: '#3B82F6' }} />
                 <h3>Location</h3>
               </div>
-              <img
-                src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?q=80&w=800&auto=format&fit=crop"
-                alt="Map Location"
-                className="map-image"
-              />
+              <img src={mapImage} className="map-image" alt="Map location" />
             </div>
           </div>
         </div>
