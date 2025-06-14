@@ -1,0 +1,111 @@
+.sidebar {
+  width: 100px;
+  background-color: #21252a; /* Dark gray */
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Logo container */
+.sidebar-logo {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 40px;
+  padding: 4px;
+  border-radius: 8px;
+  background-color: #374151;
+  overflow: hidden; /* Ensure scaled image doesn't spill outside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo image scaled inside */
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(2.7); /* Increase this to make it larger */
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.sidebar-nav li {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-item {
+  width: 60px; /* fixed size for border */
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: background-color 0.3s, filter 0.3s;
+  padding: 0; /* avoid padding pushing border */
+}
+
+.icon-img {
+  width: 110px;  /* make icon larger */
+  height: 80px;
+  transition: filter 0.3s;
+}
+
+
+/* Hover effect for icons */
+.nav-item:hover {
+  background-color: #374151;
+}
+
+.nav-item:hover .icon-img {
+  filter: brightness(0) invert(1); /* white icon effect */
+}
+
+/* Active Yellow Border */
+.nav-item.active-yellow {
+  border: 2px solid #FACC15;
+  background-color: transparent;
+}
+
+.nav-item.active-yellow .icon-img {
+  filter: brightness(0) invert(1);
+}
+
+/* Active Orange Border */
+.nav-item.active-orange {
+  border: 2px solid #F9A826;
+  background-color: transparent;
+}
+
+.nav-item.active-orange .icon-img {
+  filter: brightness(0) invert(1);
+}
+
+/* Still apply hover styles on active */
+.nav-item.active-yellow:hover,
+.nav-item.active-orange:hover {
+  background-color: #374151;
+}
+
+/* Filled background when active */
+.nav-item.filled {
+  background-color: #374151;
+}
+
+/* Maintain hover style too */
+.nav-item.filled:hover {
+  background-color: #4B5563; /* Slightly brighter on hover if desired */
+}
+
