@@ -1,7 +1,7 @@
 .homepage-container {
   flex: 1;
-  height: 100vh; /* ✅ Fix height to viewport */
-  overflow: hidden; /* ✅ Prevent scroll */
+  height: 100vh; /* Fix height to viewport */
+  overflow: hidden; /* Prevent scroll */
   background-size: cover;
   background-position: center;
   display: flex;
@@ -20,12 +20,13 @@
       background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for text readability */
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* align items to the left */
+  padding-left: 370px; 
     }
     
     .homepage-content {
       text-align: center;
-      color: white;
+      color: white; 
       padding: 20px;
       transform: translateY(50px);
     }

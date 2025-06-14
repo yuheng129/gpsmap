@@ -1,4 +1,3 @@
-i want it cnt be scroll and the map view and text field move to centre
 /* Full-screen background and overlay */
 .login-page {
   position: relative;
@@ -9,7 +8,7 @@ i want it cnt be scroll and the map view and text field move to centre
 }
 
 .map-background {
-  background-image: url('../assets/map-image.png'); /* you can use an actual background or live map later */
+  background-image: url('../assets/map-image.png'); 
   background-position: top center;  /* align top part */
   background-size: contain;         /* show whole image */
   filter: brightness(0.5);

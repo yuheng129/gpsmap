@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import floodBg from '../assets/Flood_bg.jpg';
-import amphibotPhoto from '../assets/AmphiBot_photo.png'; // 👈 Import the image
+import amphibotPhoto from '../assets/AmphiBot_photo.png';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {

@@ -29,35 +29,87 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 250px; /* fixed width */
-        height: 100%; /* full height */
-        background: #f8f8f8;
+        width: 250px;
+        height: 100%;
+        background: #ffffff;
         border-right: 1px solid #ccc;
-        padding: 10px 15px;
+        padding: 12px 16px;
         box-sizing: border-box;
-        overflow-y: auto; /* scroll if content is long */
-        font-family: Arial, sans-serif;
-        z-index: 1100; /* above map controls */
+        overflow-y: auto;
+        font-family: "Segoe UI", Arial, sans-serif;
+        z-index: 1100;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
       }
 
       #sidebar h3 {
-        margin-top: 0;
-        margin-bottom: 10px;
-        font-size: 1.2em;
+        margin: 0 0 12px 0;
+        font-size: 18px;
         border-bottom: 1px solid #ccc;
-        padding-bottom: 5px;
+        padding-bottom: 6px;
       }
 
+      /* List Styles */
       #pinList {
         list-style: none;
-        padding-left: 0;
+        padding: 0;
         margin: 0;
       }
 
+      /* Individual Pin Entry */
+      .pin-entry {
+        border-bottom: 1px solid #eee;
+        padding: 8px 0;
+        font-size: 14px;
+        color: #333;
+      }
+
+      /* Top Row of Each Entry */
+      .pin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      /* Checkbox */
+      .pin-header input[type="checkbox"] {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      /* Survivor Link */
+      .pin-link {
+        color: #0077cc;
+        text-decoration: none;
+        flex-grow: 1;
+        font-weight: 500;
+        font-size: 18px;
+      }
+
+      /* Remove Button */
+      .remove-btn {
+        background: none;
+        border: none;
+        color: #cc3333;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0 4px;
+      }
+
+      /* Timestamp and Coordinates */
+      .pin-meta {
+        font-size: 14px;
+        color: #777;
+        margin-left: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      /* 1. Pin Toggle Button */
       #pinToggleBtn {
         position: absolute;
         top: 20px;
-        left: 270px; /* right of sidebar */
+        left: 270px;
         z-index: 1000;
         padding: 10px 16px;
         background: #ffdd57;
@@ -67,12 +119,16 @@
         border-radius: 5px;
         cursor: pointer;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #pinToggleBtn:hover {
+        background-color: #ffc107;
+        transform: scale(1.05);
       }
       #pinToggleBtn.active {
         background-color: #ff6347;
         color: white;
       }
-
       /* Adjust map to not go under sidebar */
       #map {
         position: absolute;
@@ -98,10 +154,11 @@
         border: 2px solid white;
       }
 
+      /* 2. Center Button */
       #centerBtn {
         position: absolute;
-        bottom: 20px; /* position from bottom */
-        right: 20px; /* position from right */
+        bottom: 20px;
+        right: 20px;
         z-index: 1000;
         padding: 10px 16px;
         background: white;
@@ -111,7 +168,61 @@
         border-radius: 5px;
         cursor: pointer;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-        display: none; /* Hidden at first */
+        display: none;
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #centerBtn:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.05);
+      }
+      #centerBtn.active {
+        background-color: #ddd;
+      }
+
+      #findRouteBtn {
+        position: absolute;
+        top: 70px;
+        left: 270px;
+        z-index: 1000;
+        padding: 10px 16px;
+        background: #007bff;
+        color: white;
+        font-weight: bold;
+        border: 2px solid #333;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #findRouteBtn:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+      }
+      #findRouteBtn.active {
+        background-color: #003d80;
+      }
+
+      #returnToStartBtn {
+        position: absolute;
+        top: 120px;
+        left: 270px;
+        z-index: 1000;
+        padding: 10px 16px;
+        background: #28a745;
+        color: white;
+        font-weight: bold;
+        border: 2px solid #1c7c33;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+      #returnToStartBtn:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+      }
+      #returnToStartBtn.active {
+        background-color: #1e7e34;
       }
     </style>
   </head>
@@ -119,53 +230,17 @@
     <!-- Sidebar for survivor pins list -->
     <div id="sidebar">
       <h3>Survivor Pins</h3>
-      <ul id="pinList"></ul>
+      <ul id="pinList" class="pin-list"></ul>
     </div>
     <!-- Map -->
     <div id="map"></div>
+    <div id="eta-display" style="margin-top: 10px; font-weight: bold"></div>
 
     <!-- Center Robot Button -->
     <button id="centerBtn">Center Robot</button>
     <button id="pinToggleBtn">Pin Mode</button>
-    <button
-      id="findRouteBtn"
-      style="
-        position: absolute;
-        top: 70px; /* Just below the pin toggle button (which is at 20px + ~40px height) */
-        left: 270px; /* Same as pinToggleBtn */
-        z-index: 1000;
-        padding: 10px 16px;
-        background: #007bff; /* Your preferred blue */
-        color: white;
-        font-weight: bold;
-        border: 2px solid #333;
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-      "
-    >
-      Find Route
-    </button>
-
-    <button
-      id="returnToStartBtn"
-      style="
-        position: absolute;
-        top: 120px; /* 20px below the Find Route button at top: 70px + ~30px height */
-        left: 270px; /* aligned with Find Route */
-        z-index: 1000;
-        padding: 10px 16px;
-        background: #28a745; /* green */
-        color: white;
-        font-weight: bold;
-        border: 2px solid #1c7c33;
-        border-radius: 5px;
-        cursor: pointer;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
-      "
-    >
-      Return to Start
-    </button>
+    <button id="findRouteBtn">Find Route</button>
+    <button id="returnToStartBtn">Return to Start</button>
 
     <script>
       // Mapbox access token
@@ -197,6 +272,20 @@
         pitch: 60,
         bearing: 0,
       });
+
+      let baseLocation = null;
+
+      db.ref("baseLocation")
+        .once("value")
+        .then((snapshot) => {
+          const data = snapshot.val();
+          if (data && data.lat && data.lng) {
+            baseLocation = { lat: data.lat, lng: data.lng };
+            console.log("✅ Base location loaded:", baseLocation);
+          } else {
+            console.warn("⚠️ Base location not set in Firebase.");
+          }
+        });
 
       // Load and render survivor pins from Firebase
       db.ref("pins").on("value", (snapshot) => {
@@ -270,36 +359,24 @@
           const meta = marker.metadata || marker._element?.dataset || {};
 
           const li = document.createElement("li");
-          li.style.display = "flex";
-          li.style.flexDirection = "column";
-          li.style.padding = "8px";
-          li.style.borderBottom = "1px solid #ccc";
+          li.className = "pin-entry";
 
-          // Row 1: checkbox, label, delete
-          const row = document.createElement("div");
-          row.style.display = "flex";
-          row.style.alignItems = "center";
-          row.style.justifyContent = "space-between";
-          row.style.gap = "8px";
+          // Top row with checkbox, name link, delete button
+          const header = document.createElement("div");
+          header.className = "pin-header";
 
-          // Checkbox
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.className = "pin-checkbox";
           checkbox.dataset.key = key;
 
-          // Label with name and coords (fly to on click)
-          const label = document.createElement("span");
-          label.textContent = `${
-            meta.survivorId || meta.name || "Unnamed"
-          } (${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`;
-          label.style.flex = "1";
-          label.style.cursor = "pointer";
-          label.style.textDecoration = "underline";
-          label.style.color = "#0077cc";
-
-          // 🔍 Center map on pin when label is clicked
-          label.addEventListener("click", () => {
+          const link = document.createElement("a");
+          link.href = "#";
+          link.className = "pin-link";
+          link.textContent =
+            meta.survivorId || meta.name || `Survivor (${key})`;
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
             map.flyTo({
               center: [lngLat.lng, lngLat.lat],
               zoom: 18,
@@ -308,35 +385,42 @@
             });
           });
 
-          // ❌ Delete button
-          const delBtn = document.createElement("span");
-          delBtn.textContent = "❌";
-          delBtn.style.cursor = "pointer";
-          delBtn.style.color = "red";
+          const delBtn = document.createElement("button");
+          delBtn.className = "remove-btn";
+          delBtn.innerHTML = "❌";
           delBtn.title = "Delete pin";
-
           delBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // prevent flyTo
+            e.stopPropagation();
             const confirmDel = confirm(
               `Delete ${meta.survivorId || meta.name || "this pin"}?`
             );
             if (confirmDel) {
-              db.ref("pins").child(key).remove(); // Triggers global child_removed
+              db.ref("pins").child(key).remove();
             }
           });
 
-          row.appendChild(delBtn);
-          row.appendChild(checkbox);
-          row.appendChild(label);
+          header.appendChild(checkbox);
+          header.appendChild(link);
+          header.appendChild(delBtn);
 
-          // Row 2: timestamp
-          const timeEl = document.createElement("small");
+          // Metadata row (coordinates + timestamp)
+          const metaRow = document.createElement("div");
+          metaRow.className = "pin-meta";
+
+          const coords = document.createElement("span");
+          coords.textContent = `(${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(
+            5
+          )})`;
+
+          const time = document.createElement("span");
           const timestamp = parseInt(meta.timeCreated || 0);
-          timeEl.textContent = `🕒 ${new Date(timestamp).toLocaleString()}`;
-          timeEl.style.color = "#666";
+          time.textContent = new Date(timestamp).toLocaleString();
 
-          li.appendChild(row);
-          li.appendChild(timeEl);
+          metaRow.appendChild(coords);
+          metaRow.appendChild(time);
+
+          li.appendChild(header);
+          li.appendChild(metaRow);
           pinListEl.appendChild(li);
         }
 
@@ -485,11 +569,21 @@
       // Add this script to your existing HTML to compute and display a TSP route
 
       // Button to trigger route finding
+      // Button to trigger route finding
       document.getElementById("findRouteBtn").addEventListener("click", () => {
-        computeAndDrawRoute();
+        updateSelectedPins(); // 🔴 This must be called first
+        computeAIOptimizedRoute(); // 🔵 Then route is computed
       });
 
       let startMarker = null; // Global to keep track
+      // Global variable to track selected pin keys
+      let selectedPinKeys = [];
+
+      function updateSelectedPins() {
+        selectedPinKeys = Array.from(
+          document.querySelectorAll(".pin-checkbox:checked")
+        ).map((checkbox) => checkbox.dataset.key);
+      }
 
       function computeAndDrawRoute() {
         if (!window.boatMarker) {
@@ -499,13 +593,6 @@
 
         const boatPos = boatMarker.getLngLat();
         const start = { lat: boatPos.lat, lng: boatPos.lng };
-
-        // Mark start location (with a green pin, for example)
-        if (startMarker) startMarker.remove();
-        startMarker = new mapboxgl.Marker({ color: "green" })
-          .setLngLat([start.lng, start.lat])
-          .setPopup(new mapboxgl.Popup().setText("Start Position"))
-          .addTo(map);
 
         // Get selected pins
         const selectedPins = Array.from(
@@ -610,17 +697,133 @@
       document
         .getElementById("returnToStartBtn")
         .addEventListener("click", () => {
-          if (!window.currentRoute || window.currentRoute.length < 2) {
-            alert("No existing route to return from!");
+          if (!baseLocation) {
+            alert("Base location not loaded yet!");
             return;
           }
 
-          const returnToStart = [...window.currentRoute];
-          const first = window.currentRoute[0];
-          returnToStart.push({ lat: first.lat, lng: first.lng }); // Return leg
+          if (!window.boatMarker) {
+            alert("Boat location not available.");
+            return;
+          }
 
-          drawRouteLine(returnToStart);
+          const boatPos = boatMarker.getLngLat();
+          const start = { lat: boatPos.lat, lng: boatPos.lng };
+          const end = baseLocation;
+
+          // Optional: mark the base with a green pin
+          if (window.baseMarker) baseMarker.remove();
+          window.baseMarker = new mapboxgl.Marker({ color: "green" })
+            .setLngLat([end.lng, end.lat])
+            .setPopup(new mapboxgl.Popup().setText("Base Location"))
+            .addTo(map);
+
+          drawRouteLine([start, end]); // draw direct route back
         });
+
+      async function computeAIOptimizedRoute() {
+        const boatPos = boatMarker.getLngLat();
+        const start = { lat: boatPos.lat, lng: boatPos.lng };
+
+        // Fetch pins
+        const snapshot = await db.ref("pins").once("value");
+        const pins = [];
+        snapshot.forEach((child) => {
+          const key = child.key;
+          if (!selectedPinKeys.includes(key)) return; // 🔥 Only include selected pins
+
+          const data = child.val();
+          const distance = haversine(start, { lat: data.lat, lng: data.lng });
+          pins.push({
+            key: child.key,
+            lat: data.lat,
+            lng: data.lng,
+            timeCreated: data.timeCreated,
+            survivorCount: data.survivorCount || 1,
+            distance: distance,
+          });
+        });
+
+        // Normalize
+        const times = pins.map((p) => p.timeCreated);
+        const minTime = Math.min(...times),
+          maxTime = Math.max(...times);
+        const distances = pins.map((p) => p.distance);
+        const minDist = Math.min(...distances),
+          maxDist = Math.max(...distances);
+        const survivors = pins.map((p) => p.survivorCount);
+        const minSurv = Math.min(...survivors),
+          maxSurv = Math.max(...survivors);
+
+        pins.forEach((p) => {
+          const timeScore = (p.timeCreated - minTime) / (maxTime - minTime + 1);
+          const distanceScore =
+            1 - (p.distance - minDist) / (maxDist - minDist + 1);
+          const survivorScore =
+            (p.survivorCount - minSurv) / (maxSurv - minSurv + 1);
+
+          p.priorityScore =
+            0.4 * timeScore + 0.3 * distanceScore + 0.3 * survivorScore;
+        });
+
+        // Sort by priority
+        pins.sort((a, b) => b.priorityScore - a.priorityScore);
+
+        // Build route (Nearest Neighbor)
+        const visited = new Set();
+        const route = [start];
+        let current = start;
+
+        while (visited.size < pins.length) {
+          let next = null;
+          let bestDist = Infinity;
+          for (const pin of pins) {
+            if (!visited.has(pin.key)) {
+              const d = haversine(current, pin);
+              if (d < bestDist) {
+                bestDist = d;
+                next = pin;
+              }
+            }
+          }
+          if (next) {
+            route.push({ lat: next.lat, lng: next.lng });
+            current = next;
+            visited.add(next.key);
+          }
+        }
+
+        drawRouteLine(route);
+
+        const totalSeconds = estimateRouteTime(route);
+        const minutes = Math.round(totalSeconds / 60);
+
+        // Choose a position to show the popup — here: the start point
+        const etaPopup = new mapboxgl.Popup({ offset: 25 })
+          .setLngLat([route[0].lng, route[0].lat])
+          .setHTML(`<strong>ETA:</strong> ${minutes} min (incl. stops)`)
+          .addTo(map);
+      }
+
+      function estimateRouteTime(
+        route,
+        speedMps = 0.65,
+        stopDurationPerPinMin = 10
+      ) {
+        let totalDistance = 0; // in meters
+        for (let i = 1; i < route.length; i++) {
+          totalDistance += haversine(route[i - 1], route[i]); // meters
+        }
+
+        const travelSeconds = totalDistance / speedMps;
+
+        // One stop per pin (excluding starting point)
+        const numberOfStops = route.length - 2; // exclude boat start and return-to-base
+        const stopSeconds = numberOfStops * stopDurationPerPinMin * 60;
+
+        const totalSeconds = travelSeconds + stopSeconds;
+        return totalSeconds;
+      }
     </script>
   </body>
 </html>
